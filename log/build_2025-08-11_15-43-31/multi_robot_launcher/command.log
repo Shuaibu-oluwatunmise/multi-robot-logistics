@@ -1,0 +1,2 @@
+Invoking command in '/home/ros/multi_robot_ws/build/multi_robot_launcher': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/ros/multi_robot_ws/src/multi_robot_launcher -DCMAKE_INSTALL_PREFIX=/home/ros/multi_robot_ws/install/multi_robot_launcher
+Invoked command in '/home/ros/multi_robot_ws/build/multi_robot_launcher' returned '1': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/ros/multi_robot_ws/src/multi_robot_launcher -DCMAKE_INSTALL_PREFIX=/home/ros/multi_robot_ws/install/multi_robot_launcher

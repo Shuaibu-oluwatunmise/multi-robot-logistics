@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypename="rng"?>
+<package format="3">
+  <name>multi_robot_launcher</name>
+  <version>1.0.0</version>
+  <description>Multi-robot SLAM and coordination launcher</description>
+  <maintainer email="shuaibuoluwatunmise@gmail.com">Oluwatunmise</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>turtlebot4_navigation</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

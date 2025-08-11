@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Robot Logistics System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(0,0,0,0.2);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 300;
+        }
+
+        .connection-status {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.3);
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff6b6b;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #51cf66;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .map-section {
+            flex: 2;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .control-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .robot-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .robot-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .robot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .robot-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .robot-state {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .robot-state.available {
+            background: rgba(81, 207, 102, 0.8);
+            color: white;
+        }
+
+        .robot-state.busy {
+            background: rgba(255, 107, 107, 0.8);
+            color: white;
+        }
+
+        .robot-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .map-canvas {
+            width: 100%;
+            height: 500px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            border: 2px dashed rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: crosshair;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-placeholder {
+            font-size: 1.1rem;
+            opacity: 0.6;
+            text-align: center;
+        }
+
+        .ride-controls {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .ride-controls h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .location-input {
+            margin-bottom: 1rem;
+        }
+
+        .location-input label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .location-display {
+            background: rgba(0,0,0,0.3);
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn:disabled {
+            background: rgba(255,255,255,0.2);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .robot-position {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            border: 2px solid white;
+            z-index: 10;
+        }
+
+        .robot-a {
+            background: #51cf66;
+            box-shadow: 0 0 10px rgba(81, 207, 102, 0.6);
+        }
+
+        .robot-b {
+            background: #339af0;
+            box-shadow: 0 0 10px rgba(51, 154, 240, 0.6);
+        }
+
+        .pickup-pin, .destination-pin {
+            width: 16px;
+            height: 16px;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            z-index: 15;
+        }
+
+        .pickup-pin {
+            background: #ffd43b;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        .destination-pin {
+            background: #ff6b6b;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .log-section {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            height: 150px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            font-size: 0.8rem;
+            padding: 0.2rem 0;
+            opacity: 0.8;
+            font-family: 'Courier New', monospace;
+        }
+
+        .log-entry.info { color: #51cf66; }
+        .log-entry.warning { color: #ffd43b; }
+        .log-entry.error { color: #ff6b6b; }
+
+        .robot-control {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 1.2rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .control-pad {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .arrow-button {
+            width: 55px;
+            height: 55px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            color: white;
+        }
+
+        .arrow-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .arrow-button:active {
+            background: rgba(255,255,255,0.4);
+            transform: scale(0.95);
+        }
+
+        .stop-button {
+            background: rgba(255, 107, 107, 0.4) !important;
+        }
+
+        .stop-button:hover {
+            background: rgba(255, 107, 107, 0.6) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 Multi-Robot Logistics System</h1>
+        <div class="connection-status">
+            <div class="status-indicator">
+                <div class="status-dot" id="robot-a-connection"></div>
+                <span>Robot A</span>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot" id="robot-b-connection"></div>
+                <span>Robot B</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="map-section">
+            <h2 style="margin-bottom: 1rem;">🗺️ Live Map View</h2>
+            <div class="map-canvas" id="map-canvas">
+                <div class="map-placeholder">
+                    Click to set pickup location, then destination<br>
+                    <small>Robots will appear here once connected</small>
+                </div>
+            </div>
+            
+            <!-- Robot Controls moved inside map section -->
+            <div style="display: flex; gap: 2rem; justify-content: center; margin-top: 1rem;">
+                <div class="robot-control">
+                    <h3 style="text-align: center; margin-bottom: 0.8rem; color: #51cf66; font-size: 1rem;">🤖 Robot A Controls</h3>
+                    <div class="control-pad">
+                        <div class="button-row">
+                            <button class="arrow-button" onmousedown="startMove('A', 0.2, 0.5)" onmouseup="stopMove('A')" onmouseleave="stopMove('A')">↖️</button>
+                            <button class="arrow-button" onmousedown="startMove('A', 0.2, 0)" onmouseup="stopMove('A')" onmouseleave="stopMove('A')">⬆️</button>
+                            <button class="arrow-button" onmousedown="startMove('A', 0.2, -0.5)" onmouseup="stopMove('A')" onmouseleave="stopMove('A')">↗️</button>
+                        </div>
+                        <div class="button-row">
+                            <button class="arrow-button" onmousedown="startMove('A', 0, 0.5)" onmouseup="stopMove('A')" onmouseleave="stopMove('A')">⬅️</button>
+                            <button class="arrow-button stop-button" onclick="stopMove('A')">⛔</button>
+                            <button class="arrow-button" onmousedown="startMove('A', 0, -0.5)" onmouseup="stopMove('A')" onmouseleave="stopMove('A')">➡️</button>
+                        </div>
+                        <div class="button-row">
+                            <button class="arrow-button" onmousedown="startMove('A', -0.2, -0.5)" onmouseup="stopMove('A')" onmouseleave="stopMove('A')">↙️</button>
+                            <button class="arrow-button" onmousedown="startMove('A', -0.2, 0)" onmouseup="stopMove('A')" onmouseleave="stopMove('A')">⬇️</button>
+                            <button class="arrow-button" onmousedown="startMove('A', -0.2, 0.5)" onmouseup="stopMove('A')" onmouseleave="stopMove('A')">↘️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="robot-control">
+                    <h3 style="text-align: center; margin-bottom: 0.8rem; color: #339af0; font-size: 1rem;">🤖 Robot B Controls</h3>
+                    <div class="control-pad">
+                        <div class="button-row">
+                            <button class="arrow-button" onmousedown="startMove('B', 0.2, 0.5)" onmouseup="stopMove('B')" onmouseleave="stopMove('B')">↖️</button>
+                            <button class="arrow-button" onmousedown="startMove('B', 0.2, 0)" onmouseup="stopMove('B')" onmouseleave="stopMove('B')">⬆️</button>
+                            <button class="arrow-button" onmousedown="startMove('B', 0.2, -0.5)" onmouseup="stopMove('B')" onmouseleave="stopMove('B')">↗️</button>
+                        </div>
+                        <div class="button-row">
+                            <button class="arrow-button" onmousedown="startMove('B', 0, 0.5)" onmouseup="stopMove('B')" onmouseleave="stopMove('B')">⬅️</button>
+                            <button class="arrow-button stop-button" onclick="stopMove('B')">⛔</button>
+                            <button class="arrow-button" onmousedown="startMove('B', 0, -0.5)" onmouseup="stopMove('B')" onmouseleave="stopMove('B')">➡️</button>
+                        </div>
+                        <div class="button-row">
+                            <button class="arrow-button" onmousedown="startMove('B', -0.2, -0.5)" onmouseup="stopMove('B')" onmouseleave="stopMove('B')">↙️</button>
+                            <button class="arrow-button" onmousedown="startMove('B', -0.2, 0)" onmouseup="stopMove('B')" onmouseleave="stopMove('B')">⬇️</button>
+                            <button class="arrow-button" onmousedown="startMove('B', -0.2, 0.5)" onmouseup="stopMove('B')" onmouseleave="stopMove('B')">↘️</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-section">
+            <div class="robot-card">
+                <div class="robot-header">
+                    <div class="robot-name">🤖 Robot A</div>
+                    <div class="robot-state available" id="robot-a-state">AVAILABLE</div>
+                </div>
+                <div class="robot-stats">
+                    <div class="stat">
+                        <div class="stat-label">Position X</div>
+                        <div class="stat-value" id="robot-a-x">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Position Y</div>
+                        <div class="stat-value" id="robot-a-y">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Battery</div>
+                        <div class="stat-value" id="robot-a-battery">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value" id="robot-a-status">Idle</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="robot-card">
+                <div class="robot-header">
+                    <div class="robot-name">🤖 Robot B</div>
+                    <div class="robot-state available" id="robot-b-state">AVAILABLE</div>
+                </div>
+                <div class="robot-stats">
+                    <div class="stat">
+                        <div class="stat-label">Position X</div>
+                        <div class="stat-value" id="robot-b-x">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Position Y</div>
+                        <div class="stat-value" id="robot-b-y">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Battery</div>
+                        <div class="stat-value" id="robot-b-battery">--</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value" id="robot-b-status">Idle</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ride-controls">
+                <h3>🚗 Request Ride</h3>
+                <div class="location-input">
+                    <label>Pickup Location:</label>
+                    <div class="location-display" id="pickup-display">Click on map to set pickup</div>
+                </div>
+                <div class="location-input">
+                    <label>Destination:</label>
+                    <div class="location-display" id="destination-display">Click on map to set destination</div>
+                </div>
+                <button class="btn" id="request-ride-btn" disabled>Request Ride</button>
+            </div>
+
+            <div class="log-section">
+                <div id="log-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let rosA = null;  // Robot A connection
+        let rosB = null;  // Robot B connection
+        let robotAOdom = null;
+        let robotBOdom = null;
+        let robotACmdVel = null;
+        let robotBCmdVel = null;
+        let pickupLocation = null;
+        let destinationLocation = null;
+        let clickState = 'pickup'; // 'pickup' or 'destination'
+        
+        // Robot positions (for visualization)
+        let robotPositions = {
+            robotA: { x: 0, y: 0 },
+            robotB: { x: 0, y: 0 }
+        };
+
+        // Movement intervals
+        let moveIntervals = {
+            A: null,
+            B: null
+        };
+
+        // Initialize ROS connections
+        function initROS() {
+            // Robot A connection (port 9090)
+            rosA = new ROSLIB.Ros({
+                url: 'ws://localhost:9090'
+            });
+
+            rosA.on('connection', function() {
+                log('Robot A connected to ROSBridge (port 9090)', 'info');
+                setupRobotASubscriptions();
+                setupRobotAPublishers();
+                updateConnectionStatus('A', true);
+            });
+
+            rosA.on('error', function(error) {
+                log('Robot A ROSBridge connection error: ' + error, 'error');
+                updateConnectionStatus('A', false);
+            });
+
+            rosA.on('close', function() {
+                log('Robot A ROSBridge connection closed', 'warning');
+                updateConnectionStatus('A', false);
+                setTimeout(() => { initRobotA(); }, 3000);
+            });
+
+            // Robot B connection (port 9091)
+            rosB = new ROSLIB.Ros({
+                url: 'ws://localhost:9091'
+            });
+
+            rosB.on('connection', function() {
+                log('Robot B connected to ROSBridge (port 9091)', 'info');
+                setupRobotBSubscriptions();
+                setupRobotBPublishers();
+                updateConnectionStatus('B', true);
+            });
+
+            rosB.on('error', function(error) {
+                log('Robot B ROSBridge connection error: ' + error, 'error');
+                updateConnectionStatus('B', false);
+            });
+
+            rosB.on('close', function() {
+                log('Robot B ROSBridge connection closed', 'warning');
+                updateConnectionStatus('B', false);
+                setTimeout(() => { initRobotB(); }, 3000);
+            });
+        }
+
+        function initRobotA() {
+            rosA = new ROSLIB.Ros({ url: 'ws://localhost:9090' });
+            // ... robot A connection handlers
+        }
+
+        function initRobotB() {
+            rosB = new ROSLIB.Ros({ url: 'ws://localhost:9091' });
+            // ... robot B connection handlers
+        }
+
+        function updateConnectionStatus(robot, connected) {
+            const statusId = robot === 'A' ? 'robot-a-connection' : 'robot-b-connection';
+            const element = document.getElementById(statusId);
+            if (element) {
+                if (connected) {
+                    element.classList.add('connected');
+                } else {
+                    element.classList.remove('connected');
+                }
+            }
+        }
+
+        // Setup Robot A subscriptions
+        function setupRobotASubscriptions() {
+            robotAOdom = new ROSLIB.Topic({
+                ros: rosA,
+                name: '/odom',
+                messageType: 'nav_msgs/Odometry'
+            });
+
+            robotAOdom.subscribe(function(message) {
+                updateRobotPosition('A', message);
+            });
+
+            log('Robot A subscriptions setup', 'info');
+        }
+
+        // Setup Robot B subscriptions  
+        function setupRobotBSubscriptions() {
+            robotBOdom = new ROSLIB.Topic({
+                ros: rosB,
+                name: '/odom',
+                messageType: 'nav_msgs/Odometry'
+            });
+
+            robotBOdom.subscribe(function(message) {
+                updateRobotPosition('B', message);
+            });
+
+            log('Robot B subscriptions setup', 'info');
+        }
+
+        // Setup Robot A publishers
+        function setupRobotAPublishers() {
+            robotACmdVel = new ROSLIB.Topic({
+                ros: rosA,
+                name: '/cmd_vel',
+                messageType: 'geometry_msgs/TwistStamped'
+            });
+
+            log('Robot A publishers setup', 'info');
+        }
+
+        // Setup Robot B publishers
+        function setupRobotBPublishers() {
+            robotBCmdVel = new ROSLIB.Topic({
+                ros: rosB,
+                name: '/cmd_vel',
+                messageType: 'geometry_msgs/TwistStamped'
+            });
+
+            log('Robot B publishers setup', 'info');
+        }
+
+        // Robot movement functions
+        function startMove(robot, linear, angular) {
+            if (moveIntervals[robot]) clearInterval(moveIntervals[robot]);
+            
+            moveIntervals[robot] = setInterval(() => {
+                sendMoveCommand(robot, linear, angular);
+            }, 100);
+
+            log(`Robot ${robot} moving: linear=${linear}, angular=${angular}`, 'info');
+        }
+
+        function stopMove(robot) {
+            if (moveIntervals[robot]) {
+                clearInterval(moveIntervals[robot]);
+                moveIntervals[robot] = null;
+            }
+            sendMoveCommand(robot, 0, 0);
+            log(`Robot ${robot} stopped`, 'info');
+        }
+
+        function sendMoveCommand(robot, linear, angular) {
+            const twistStamped = new ROSLIB.Message({
+                header: {
+                    stamp: {
+                        sec: Math.floor(Date.now() / 1000),
+                        nanosec: (Date.now() % 1000) * 1000000
+                    },
+                    frame_id: ''
+                },
+                twist: {
+                    linear: {
+                        x: linear,
+                        y: 0,
+                        z: 0
+                    },
+                    angular: {
+                        x: 0,
+                        y: 0,
+                        z: angular
+                    }
+                }
+            });
+
+            if (robot === 'A' && robotACmdVel) {
+                robotACmdVel.publish(twistStamped);
+            } else if (robot === 'B' && robotBCmdVel) {
+                robotBCmdVel.publish(twistStamped);
+            }
+        }
+
+        // Update robot position display
+        function updateRobotPosition(robot, odomMessage) {
+            const x = odomMessage.pose.pose.position.x.toFixed(3);
+            const y = odomMessage.pose.pose.position.y.toFixed(3);
+            
+            if (robot === 'A') {
+                document.getElementById('robot-a-x').textContent = x;
+                document.getElementById('robot-a-y').textContent = y;
+                robotPositions.robotA = { x: parseFloat(x), y: parseFloat(y) };
+            } else {
+                document.getElementById('robot-b-x').textContent = x;
+                document.getElementById('robot-b-y').textContent = y;
+                robotPositions.robotB = { x: parseFloat(x), y: parseFloat(y) };
+            }
+            
+            updateMapVisualization();
+        }
+
+        // Handle map clicks
+        function handleMapClick(event) {
+            const mapCanvas = document.getElementById('map-canvas');
+            const rect = mapCanvas.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 10 - 5; // Convert to -5 to 5 range
+            const y = ((event.clientY - rect.top) / rect.height) * 10 - 5;
+
+            if (clickState === 'pickup') {
+                pickupLocation = { x: x.toFixed(2), y: y.toFixed(2) };
+                document.getElementById('pickup-display').textContent = `(${pickupLocation.x}, ${pickupLocation.y})`;
+                clickState = 'destination';
+                log('Pickup location set: (' + pickupLocation.x + ', ' + pickupLocation.y + ')', 'info');
+            } else {
+                destinationLocation = { x: x.toFixed(2), y: y.toFixed(2) };
+                document.getElementById('destination-display').textContent = `(${destinationLocation.x}, ${destinationLocation.y})`;
+                clickState = 'pickup'; // Reset for next ride
+                log('Destination set: (' + destinationLocation.x + ', ' + destinationLocation.y + ')', 'info');
+            }
+
+            updateMapVisualization();
+            updateRequestButton();
+        }
+
+        // Update map visualization
+        function updateMapVisualization() {
+            const mapCanvas = document.getElementById('map-canvas');
+            
+            // Clear existing markers
+            const existingMarkers = mapCanvas.querySelectorAll('.robot-position, .pickup-pin, .destination-pin');
+            existingMarkers.forEach(marker => marker.remove());
+
+            // Add robot positions
+            addRobotMarker('robotA', robotPositions.robotA.x, robotPositions.robotA.y, 'robot-a');
+            addRobotMarker('robotB', robotPositions.robotB.x, robotPositions.robotB.y, 'robot-b');
+
+            // Add pickup/destination pins
+            if (pickupLocation) {
+                addPin(parseFloat(pickupLocation.x), parseFloat(pickupLocation.y), 'pickup-pin');
+            }
+            if (destinationLocation) {
+                addPin(parseFloat(destinationLocation.x), parseFloat(destinationLocation.y), 'destination-pin');
+            }
+        }
+
+        // Add robot marker to map
+        function addRobotMarker(robotId, x, y, className) {
+            const mapCanvas = document.getElementById('map-canvas');
+            const marker = document.createElement('div');
+            marker.className = `robot-position ${className}`;
+            
+            // Convert world coordinates to canvas coordinates
+            const canvasX = ((x + 5) / 10) * 100; // Convert -5:5 to 0:100%
+            const canvasY = ((y + 5) / 10) * 100;
+            
+            marker.style.left = `${canvasX}%`;
+            marker.style.top = `${canvasY}%`;
+            marker.title = `${robotId}: (${x.toFixed(2)}, ${y.toFixed(2)})`;
+            
+            mapCanvas.appendChild(marker);
+        }
+
+        // Add pickup/destination pin to map
+        function addPin(x, y, className) {
+            const mapCanvas = document.getElementById('map-canvas');
+            const pin = document.createElement('div');
+            pin.className = className;
+            
+            const canvasX = ((x + 5) / 10) * 100;
+            const canvasY = ((y + 5) / 10) * 100;
+            
+            pin.style.left = `${canvasX}%`;
+            pin.style.top = `${canvasY}%`;
+            
+            mapCanvas.appendChild(pin);
+        }
+
+        // Update request ride button state
+        function updateRequestButton() {
+            const btn = document.getElementById('request-ride-btn');
+            if (pickupLocation && destinationLocation) {
+                btn.disabled = false;
+                btn.textContent = 'Request Ride';
+            } else {
+                btn.disabled = true;
+                btn.textContent = pickupLocation ? 'Set Destination' : 'Set Pickup Location';
+            }
+        }
+
+        // Handle ride request
+        function requestRide() {
+            if (!pickupLocation || !destinationLocation) return;
+
+            log('Ride requested from (' + pickupLocation.x + ', ' + pickupLocation.y + ') to (' + destinationLocation.x + ', ' + destinationLocation.y + ')', 'info');
+            
+            // Calculate distances to both robots
+            const distanceA = calculateDistance(
+                parseFloat(pickupLocation.x), parseFloat(pickupLocation.y),
+                robotPositions.robotA.x, robotPositions.robotA.y
+            );
+            
+            const distanceB = calculateDistance(
+                parseFloat(pickupLocation.x), parseFloat(pickupLocation.y),
+                robotPositions.robotB.x, robotPositions.robotB.y
+            );
+
+            // Assign to closest robot
+            const closestRobot = distanceA < distanceB ? 'A' : 'B';
+            log(`Robot ${closestRobot} assigned (distance: ${(distanceA < distanceB ? distanceA : distanceB).toFixed(2)}m)`, 'info');
+
+            // Reset locations for next ride
+            pickupLocation = null;
+            destinationLocation = null;
+            document.getElementById('pickup-display').textContent = 'Click on map to set pickup';
+            document.getElementById('destination-display').textContent = 'Click on map to set destination';
+            updateMapVisualization();
+            updateRequestButton();
+        }
+
+        // Calculate distance between two points
+        function calculateDistance(x1, y1, x2, y2) {
+            return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        }
+
+        // Log function
+        function log(message, level = 'info') {
+            const logContainer = document.getElementById('log-container');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${level}`;
+            logEntry.textContent = `${timestamp}: ${message}`;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            
+            // Keep only last 50 entries
+            while (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('map-canvas').addEventListener('click', handleMapClick);
+        document.getElementById('request-ride-btn').addEventListener('click', requestRide);
+
+        // Initialize on page load
+        window.onload = function() {
+            log('Multi-Robot Logistics System starting...', 'info');
+            initROS();
+        };
+    </script>
+
+    <!-- Include ROSLIB -->
+    <script src="https://cdn.jsdelivr.net/npm/roslib@1.3.0/build/roslib.min.js"></script>
+</body>
+</html>

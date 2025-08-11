@@ -1,0 +1,22 @@
+-- Found ament_cmake: 2.5.3 (/opt/ros/jazzy/share/ament_cmake/cmake)
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/ros/multi_robot_ws/build/multi_robot_launcher
+-- Install configuration: ""
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/multi_robot_slam.launch.py
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/ament_index/resource_index/package_run_dependencies/multi_robot_launcher
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/ament_index/resource_index/parent_prefix_path/multi_robot_launcher
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/environment/ament_prefix_path.sh
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/environment/ament_prefix_path.dsv
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/environment/path.sh
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/environment/path.dsv
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/local_setup.bash
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/local_setup.sh
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/local_setup.zsh
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/local_setup.dsv
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/package.dsv
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/ament_index/resource_index/packages/multi_robot_launcher
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/cmake/multi_robot_launcherConfig.cmake
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/cmake/multi_robot_launcherConfig-version.cmake
+-- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/package.xml

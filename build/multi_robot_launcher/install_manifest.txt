@@ -1,0 +1,16 @@
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/multi_robot_slam.launch.py
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/ament_index/resource_index/package_run_dependencies/multi_robot_launcher
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/ament_index/resource_index/parent_prefix_path/multi_robot_launcher
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/environment/ament_prefix_path.sh
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/environment/ament_prefix_path.dsv
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/environment/path.sh
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/environment/path.dsv
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/local_setup.bash
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/local_setup.sh
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/local_setup.zsh
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/local_setup.dsv
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/package.dsv
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/ament_index/resource_index/packages/multi_robot_launcher
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/cmake/multi_robot_launcherConfig.cmake
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/cmake/multi_robot_launcherConfig-version.cmake
+/home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/package.xml

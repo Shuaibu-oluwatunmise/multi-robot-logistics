@@ -1,0 +1,355 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    background: rgba(0,0,0,0.2);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+.header h1 {
+    font-size: 1.8rem;
+    font-weight: 300;
+}
+
+.connection-status {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    background: rgba(0,0,0,0.3);
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff6b6b;
+    animation: pulse 2s infinite;
+}
+
+.status-dot.connected {
+    background: #51cf66;
+}
+
+.main-container {
+    flex: 1;
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.map-section {
+    flex: 2;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 1rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.control-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.robot-card {
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+}
+
+.robot-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.robot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.robot-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.robot-state {
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.robot-state.available {
+    background: rgba(81, 207, 102, 0.8);
+    color: white;
+}
+
+.robot-state.busy {
+    background: rgba(255, 107, 107, 0.8);
+    color: white;
+}
+
+.robot-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.stat {
+    text-align: center;
+    padding: 0.5rem;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    margin-bottom: 0.2rem;
+}
+
+.stat-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.map-canvas {
+    width: 100%;
+    height: 500px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    border: 2px dashed rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: crosshair;
+    position: relative;
+    overflow: hidden;
+}
+
+.map-placeholder {
+    font-size: 1.1rem;
+    opacity: 0.6;
+    text-align: center;
+}
+
+.ride-controls {
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.ride-controls h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.location-input {
+    margin-bottom: 1rem;
+}
+
+.location-input label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.location-display {
+    background: rgba(0,0,0,0.3);
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.btn {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+}
+
+.btn:disabled {
+    background: rgba(255,255,255,0.2);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.btn-danger {
+    background: rgba(255, 107, 107, 0.6) !important;
+}
+
+.robot-actions {
+    margin-top: 1rem;
+}
+
+.robot-position {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border: 2px solid white;
+    z-index: 10;
+}
+
+.robot-a {
+    background: #51cf66;
+    box-shadow: 0 0 10px rgba(81, 207, 102, 0.6);
+}
+
+.robot-b {
+    background: #339af0;
+    box-shadow: 0 0 10px rgba(51, 154, 240, 0.6);
+}
+
+.pickup-pin, .destination-pin {
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 15;
+}
+
+.pickup-pin {
+    background: #ffd43b;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.destination-pin {
+    background: #ff6b6b;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.robot-control {
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 1.2rem;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.control-pad {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.button-row {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.arrow-button {
+    width: 55px;
+    height: 55px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    color: white;
+}
+
+.arrow-button:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+}
+
+.arrow-button:active {
+    background: rgba(255,255,255,0.4);
+    transform: scale(0.95);
+}
+
+.stop-button {
+    background: rgba(255, 107, 107, 0.4) !important;
+}
+
+.stop-button:hover {
+    background: rgba(255, 107, 107, 0.6) !important;
+}
+
+.log-section {
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    height: 150px;
+    overflow-y: auto;
+}
+
+.log-entry {
+    font-size: 0.8rem;
+    padding: 0.2rem 0;
+    opacity: 0.8;
+    font-family: 'Courier New', monospace;
+}
+
+.log-entry.info { color: #51cf66; }
+.log-entry.warning { color: #ffd43b; }
+.log-entry.error { color: #ff6b6b; }
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}

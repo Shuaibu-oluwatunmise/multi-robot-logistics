@@ -1,0 +1,23 @@
+{
+  "robots": [],
+  "templates": {
+    "new_robot": {
+      "id": "",
+      "name": "",
+      "domain": 0,
+      "ip": "",
+      "discovery_server": "",
+      "rosbridge_port": 9090,
+      "color": "#ffd43b",
+      "enabled": false
+    }
+  },
+  "settings": {
+    "max_robots": 4,
+    "default_linear_speed": 0.2,
+    "default_angular_speed": 0.5,
+    "map_click_precision": 2,
+    "color_palette": ["#51cf66", "#339af0", "#ffd43b", "#ff6b6b"],
+    "starting_port": 9090
+  }
+}

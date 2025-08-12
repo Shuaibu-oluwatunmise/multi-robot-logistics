@@ -423,14 +423,64 @@ body {
     margin-top: 1rem;
 }
 
+/* Triangle Robot Markers - ADD TO YOUR CSS */
 .robot-position {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
     position: absolute;
     transform: translate(-50%, -50%);
-    border: 2px solid white;
-    z-index: 10;
+    z-index: 20;
+    transition: all 0.3s ease;
+}
+
+.robot-triangle {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 20px solid #51cf66; /* Default green */
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    transition: transform 0.3s ease;
+}
+
+/* Different colors for different robots */
+.robot-a .robot-triangle {
+    border-bottom-color: #51cf66; /* Green */
+}
+
+.robot-b .robot-triangle {
+    border-bottom-color: #339af0; /* Blue */
+}
+
+.robot-c .robot-triangle {
+    border-bottom-color: #ff6b6b; /* Red */
+}
+
+.robot-d .robot-triangle {
+    border-bottom-color: #ffd43b; /* Yellow */
+}
+
+/* Robot label */
+.robot-label {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Hover effects */
+.robot-position:hover .robot-triangle {
+    transform: scale(1.2);
+}
+
+.robot-position:hover .robot-label {
+    opacity: 1;
 }
 
 .robot-a {

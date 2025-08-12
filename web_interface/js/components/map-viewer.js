@@ -2,6 +2,7 @@ class MapViewer {
     constructor() {
         this.element = null;
         this.robotPositions = new Map();
+        this.robotOrientations = new Map(); // Store robot orientations
         this.mapData = new Map(); // Store actual SLAM map data
         this.currentMapInfo = null; // For coordinate conversion
         this.mapBounds = { min: -5, max: 5 }; // Fallback coordinate bounds
@@ -38,7 +39,6 @@ class MapViewer {
         if (!this.element) return;
 
         const mapCanvas = this.element.querySelector('#map-canvas');
-        // Remove click handler for pins - manager mode doesn't need ride requests
         mapCanvas.addEventListener('click', (event) => this.handleMapClick(event));
     }
 
@@ -149,7 +149,11 @@ class MapViewer {
         tempCtx.putImageData(imageData, 0, 0);
         
         // Draw scaled map
-        ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+        // Flip the map horizontally to fix lateral inversion
+        ctx.save(); // Save current transform
+        ctx.scale(-1, 1); // Flip horizontally
+        ctx.drawImage(tempCanvas, -canvas.width, 0, canvas.width, canvas.height); // Draw flipped
+        ctx.restore(); // Restore transform
         
         // Store map info for coordinate conversion
         this.currentMapInfo = {
@@ -183,8 +187,9 @@ class MapViewer {
         const mapY = (y - info.origin.position.y) / info.resolution;
         
         // Convert map grid coordinates to canvas coordinates
+        // NO horizontal flip here - the flip is already done in renderMap()
         const canvasX = (mapX / info.width) * info.canvasWidth;
-        const canvasY = info.canvasHeight - ((mapY / info.height) * info.canvasHeight); // Flip Y axis
+        const canvasY = (mapY / info.height) * info.canvasHeight;
         
         return { x: canvasX, y: canvasY };
     }
@@ -200,7 +205,7 @@ class MapViewer {
         const info = this.currentMapInfo;
         
         // Convert canvas coordinates to map grid coordinates
-        const mapX = (canvasX / info.canvasWidth) * info.width;
+        const mapX = ((info.canvasHeight - canvasX) / info.canvasWidth) * info.width;
         const mapY = ((info.canvasHeight - canvasY) / info.canvasHeight) * info.height; // Flip Y axis
         
         // Convert map grid coordinates to world coordinates
@@ -210,10 +215,35 @@ class MapViewer {
         return { x: worldX, y: worldY };
     }
 
-    // ROBOT POSITION TRACKING
+    // ROBOT POSITION AND ORIENTATION TRACKING
     updateRobotPosition(robotId, position) {
         this.robotPositions.set(robotId, position);
         this.updateMapVisualization();
+    }
+
+    updateRobotPose(robotId, pose) {
+        // Update both position and orientation
+        this.robotPositions.set(robotId, {
+            x: pose.position.x,
+            y: pose.position.y
+        });
+        
+        // Convert quaternion to yaw angle (rotation around Z axis)
+        const orientation = pose.orientation;
+        const yaw = this.quaternionToYaw(orientation);
+        this.robotOrientations.set(robotId, yaw);
+        
+        this.updateMapVisualization();
+    }
+
+    quaternionToYaw(q) {
+        // Convert quaternion to yaw angle in degrees
+        const siny_cosp = 2 * (q.w * q.z + q.x * q.y);
+        const cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
+        const yaw = Math.atan2(siny_cosp, cosy_cosp);
+        
+        // Convert radians to degrees
+        return (yaw * 180 / Math.PI);
     }
 
     updateMapVisualization() {
@@ -231,27 +261,61 @@ class MapViewer {
             placeholder.style.display = hasContent ? 'none' : 'flex';
         }
 
-        // Add robot positions
+        // Add robot triangle markers
         this.robotPositions.forEach((position, robotId) => {
-            this.addRobotMarker(robotId, position.x, position.y);
+            const orientation = this.robotOrientations.get(robotId) || 0;
+            this.addRobotTriangle(robotId, position.x, position.y, orientation);
         });
     }
 
-    addRobotMarker(robotId, x, y) {
+    addRobotTriangle(robotId, x, y, yawDegrees = 0) {
         const mapCanvas = this.element.querySelector('#map-canvas');
         if (!mapCanvas) return;
 
-        const marker = document.createElement('div');
-        marker.className = `robot-position ${robotId.replace('_', '-')}`;
+        // Create robot container
+        const robotContainer = document.createElement('div');
+        robotContainer.className = `robot-position ${robotId.replace('_', '-')}`;
         
         // Convert world coordinates to canvas coordinates
         const canvasCoords = this.convertMapToCanvas(x, y);
         
-        marker.style.left = `${canvasCoords.x}px`;
-        marker.style.top = `${canvasCoords.y}px`;
-        marker.title = `${robotId}: (${x.toFixed(3)}, ${y.toFixed(3)})`;
+        // DEBUG: Add logging AFTER the existing conversion (ADD THIS)
+        this.log(`🔧 Debug for ${robotId}:`, 'info');
+        this.log(`  World coords: (${x.toFixed(3)}, ${y.toFixed(3)})`, 'info');
         
-        mapCanvas.appendChild(marker);
+        if (this.currentMapInfo) {
+            const origin = this.currentMapInfo.origin.position;
+            this.log(`  Map origin: (${origin.x.toFixed(3)}, ${origin.y.toFixed(3)})`, 'info');
+            this.log(`  Resolution: ${this.currentMapInfo.resolution}`, 'info');
+        }
+        
+        this.log(`  Canvas coords: (${canvasCoords.x.toFixed(1)}, ${canvasCoords.y.toFixed(1)})`, 'info');
+        
+        robotContainer.style.left = `${canvasCoords.x}px`;
+        robotContainer.style.top = `${canvasCoords.y}px`;
+        
+        // Create triangle element
+        const triangle = document.createElement('div');
+        triangle.className = 'robot-triangle';
+        
+        // Rotate triangle based on robot orientation
+        // Add 90 degrees because CSS triangle points up by default, but we want 0° to point right
+        const rotationAngle = -(yawDegrees + 90);
+        triangle.style.transform = `rotate(${rotationAngle}deg)`;
+        
+        // Create label
+        const label = document.createElement('div');
+        label.className = 'robot-label';
+        label.textContent = robotId;
+        
+        // Assemble robot marker
+        robotContainer.appendChild(triangle);
+        robotContainer.appendChild(label);
+        
+        // Add tooltip
+        robotContainer.title = `${robotId}: (${x.toFixed(3)}, ${y.toFixed(3)}) @ ${yawDegrees.toFixed(1)}°`;
+        
+        mapCanvas.appendChild(robotContainer);
     }
 
     // CONTROL PAD MANAGEMENT

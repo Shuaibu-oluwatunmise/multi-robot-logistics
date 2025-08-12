@@ -162,4 +162,201 @@ class MultiRobotApp {
             }
         });
     }
+
+    // SLAM MANAGEMENT METHODS - SEPARATE METHODS, NOT INSIDE bindGlobalEvents!
+    async startMapping() {
+        const connectedRobots = this.robotManager.getConnectedRobots();
+        
+        if (connectedRobots.length === 0) {
+            this.log('No robots connected - cannot start mapping', 'warning');
+            return;
+        }
+
+        this.log(`Starting SLAM mapping for ${connectedRobots.length} robot(s)`, 'info');
+        
+        // Launch SLAM for each connected robot
+        const slamPromises = connectedRobots.map(({ id, config }) => {
+            return this.launchSLAMForRobot(config);
+        });
+
+        try {
+            // Start all SLAM processes
+            await Promise.allSettled(slamPromises);
+            
+            // Subscribe to map topics to get map data
+            await this.subscribeToMapTopics();
+            
+            this.log('SLAM mapping started successfully! Drive the robots around to build maps.', 'info');
+        } catch (error) {
+            this.log(`Failed to start mapping: ${error.message}`, 'error');
+        }
+    }
+
+    async launchSLAMForRobot(robotConfig) {
+        this.log(`Launching SLAM for ${robotConfig.name}...`, 'info');
+        
+        try {
+            // Send SLAM launch request to our Python server
+            const response = await fetch('/launch_slam', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    domain: robotConfig.domain,
+                    discovery_server: robotConfig.discovery_server,
+                    robot_name: robotConfig.name,
+                    robot_id: robotConfig.id,
+                    sync: false // Use async SLAM like your working version
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                this.log(`✅ ${result.message}`, 'info');
+                
+                // Update robot status
+                const robotCard = this.robotManager.robotCards.get(robotConfig.id);
+                if (robotCard) {
+                    robotCard.updateStatus('Mapping');
+                    robotCard.setState('busy');
+                }
+            } else {
+                throw new Error('SLAM launch server not available');
+            }
+        } catch (error) {
+            // Fallback: Show manual command with correct format
+            const slamCommand = [
+                `export ROS_DOMAIN_ID=${robotConfig.domain}`,
+                `export ROS_DISCOVERY_SERVER=";;;;;;${robotConfig.discovery_server};"`,
+                `ros2 launch turtlebot4_navigation slam.launch.py sync:=false`
+            ].join(' && ');
+            
+            this.log(`❌ Auto SLAM launch failed for ${robotConfig.name}`, 'error');
+            this.log(`Manual command: ${slamCommand}`, 'info');
+            throw error;
+        }
+    }
+
+    async subscribeToMapTopics() {
+        this.log('Subscribing to map and pose topics...', 'info');
+        
+        // Subscribe to map data and robot poses from all connected robots
+        const connectedRobots = this.robotManager.getConnectedRobots();
+        
+        connectedRobots.forEach(({ id, config }) => {
+            // Subscribe to /map topic for each robot
+            const mapTopic = new ROSLIB.Topic({
+                ros: this.rosConnector.connections.get(id),
+                name: '/map',
+                messageType: 'nav_msgs/OccupancyGrid'
+            });
+
+            mapTopic.subscribe((message) => {
+                this.handleMapUpdate(id, message);
+            });
+
+            // Subscribe to robot pose for position and orientation
+            const poseTopic = new ROSLIB.Topic({
+                ros: this.rosConnector.connections.get(id),
+                name: '/pose',  // or '/odom' or '/amcl_pose' - try different topics
+                messageType: 'geometry_msgs/PoseWithCovarianceStamped'
+            });
+
+            poseTopic.subscribe((message) => {
+                this.handlePoseUpdate(id, message);
+            });
+
+            // Also try odometry if pose doesn't work
+            const odomTopic = new ROSLIB.Topic({
+                ros: this.rosConnector.connections.get(id),
+                name: '/odom',
+                messageType: 'nav_msgs/Odometry'
+            });
+
+            odomTopic.subscribe((message) => {
+                this.handleOdomUpdate(id, message);
+            });
+
+            this.log(`Subscribed to /map and pose topics for ${config.name}`, 'info');
+        });
+    }
+    handlePoseUpdate(robotId, poseMessage) {
+        if (this.mapViewer && poseMessage.pose && poseMessage.pose.pose) {
+            this.mapViewer.updateRobotPose(robotId, poseMessage.pose.pose);
+            
+            const pos = poseMessage.pose.pose.position;
+            this.log(`${robotId} pose: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)})`, 'info');
+        }
+    }
+
+    handleOdomUpdate(robotId, odomMessage) {
+        if (this.mapViewer && odomMessage.pose && odomMessage.pose.pose) {
+            this.mapViewer.updateRobotPose(robotId, odomMessage.pose.pose);
+            
+            const pos = odomMessage.pose.pose.position;
+            this.log(`${robotId} odometry: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)})`, 'info');
+        }
+    }
+
+    handleMapUpdate(robotId, mapData) {
+        // Update the map viewer with new map data
+        if (this.mapViewer) {
+            this.mapViewer.updateMapData(robotId, mapData);
+        }
+        
+        // Log map progress
+        const occupiedCells = mapData.data.filter(cell => cell > 50).length;
+        const totalCells = mapData.data.length;
+        const mappingProgress = ((occupiedCells / totalCells) * 100).toFixed(1);
+        
+        this.log(`${robotId} map update: ${mappingProgress}% coverage`, 'info');
+    }
+
+    async stopMapping() {
+        this.log('Stopping SLAM mapping for all robots', 'info');
+        
+        const connectedRobots = this.robotManager.getConnectedRobots();
+        
+        // Stop SLAM processes
+        const stopPromises = connectedRobots.map(({ id, config }) => {
+            return this.stopSLAMForRobot(config);
+        });
+
+        try {
+            await Promise.allSettled(stopPromises);
+            this.log('SLAM mapping stopped for all robots', 'info');
+        } catch (error) {
+            this.log(`Error stopping mapping: ${error.message}`, 'error');
+        }
+    }
+
+    async stopSLAMForRobot(robotConfig) {
+        try {
+            const response = await fetch('/stop_slam', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    robot_name: robotConfig.name,
+                    robot_id: robotConfig.id
+                })
+            });
+
+            if (response.ok) {
+                // Update robot status
+                const robotCard = this.robotManager.robotCards.get(robotConfig.id);
+                if (robotCard) {
+                    robotCard.updateStatus('Connected');
+                    robotCard.setState('available');
+                }
+            }
+        } catch (error) {
+            this.log(`Failed to stop SLAM for ${robotConfig.name}`, 'warning');
+        }
+    }
 }
+
+// Export for global use
+window.MultiRobotApp = MultiRobotApp;

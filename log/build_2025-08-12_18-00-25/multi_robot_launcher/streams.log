@@ -1,0 +1,45 @@
+[0.018s] Invoking command in '/home/ros/multi_robot_ws/build/multi_robot_launcher': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/ros/multi_robot_ws/build/multi_robot_launcher -- -j4 -l4
+[0.078s] Invoked command in '/home/ros/multi_robot_ws/build/multi_robot_launcher' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/ros/multi_robot_ws/build/multi_robot_launcher -- -j4 -l4
+[0.086s] Invoking command in '/home/ros/multi_robot_ws/build/multi_robot_launcher': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/ros/multi_robot_ws/build/multi_robot_launcher
+[0.091s] -- Install configuration: ""
+[0.094s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch
+[0.094s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/log
+[0.094s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/log/build_2025-08-11_15-49-00
+[0.094s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/log/build_2025-08-11_15-49-00/events.log
+[0.094s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/log/build_2025-08-11_15-49-00/logger_all.log
+[0.095s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/log/COLCON_IGNORE
+[0.095s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/log/latest
+[0.095s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/log/latest_build
+[0.095s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install
+[0.095s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install/setup.sh
+[0.095s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install/setup.bash
+[0.096s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install/.colcon_install_layout
+[0.096s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install/_local_setup_util_sh.py
+[0.096s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install/local_setup.sh
+[0.097s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install/local_setup.zsh
+[0.097s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install/COLCON_IGNORE
+[0.097s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install/local_setup.ps1
+[0.097s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install/setup.zsh
+[0.097s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install/_local_setup_util_ps1.py
+[0.097s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install/setup.ps1
+[0.098s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/install/local_setup.bash
+[0.098s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/build
+[0.098s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/build/COLCON_IGNORE
+[0.099s] -- Installing: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/build/.built_by
+[0.099s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher//launch/multi_robot_slam.launch.py
+[0.099s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/ament_index/resource_index/package_run_dependencies/multi_robot_launcher
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/ament_index/resource_index/parent_prefix_path/multi_robot_launcher
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/environment/ament_prefix_path.sh
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/environment/ament_prefix_path.dsv
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/environment/path.sh
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/environment/path.dsv
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/local_setup.bash
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/local_setup.sh
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/local_setup.zsh
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/local_setup.dsv
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/package.dsv
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/ament_index/resource_index/packages/multi_robot_launcher
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/cmake/multi_robot_launcherConfig.cmake
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/cmake/multi_robot_launcherConfig-version.cmake
+[0.100s] -- Up-to-date: /home/ros/multi_robot_ws/install/multi_robot_launcher/share/multi_robot_launcher/package.xml
+[0.102s] Invoked command in '/home/ros/multi_robot_ws/build/multi_robot_launcher' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/ros/multi_robot_ws/build/multi_robot_launcher

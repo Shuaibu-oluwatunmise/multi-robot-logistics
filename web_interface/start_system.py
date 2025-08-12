@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import subprocess
 import threading
 import time
@@ -7,13 +6,14 @@ import json
 import os
 import signal
 import sys
-from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
 import webbrowser
 
 class MultiRobotHandler(BaseHTTPRequestHandler):
-    # Store running ROSBridge processes
+    # Store running processes
     rosbridge_processes = {}
+    slam_processes = {}
     
     def do_GET(self):
         # Serve static files (HTML, CSS, JS)
@@ -47,105 +47,198 @@ class MultiRobotHandler(BaseHTTPRequestHandler):
     
     def do_POST(self):
         if self.path == '/launch_rosbridge':
-            try:
-                content_length = int(self.headers['Content-Length'])
-                post_data = self.rfile.read(content_length)
-                data = json.loads(post_data.decode('utf-8'))
-                
-                domain = data.get('domain')
-                discovery_server = data.get('discovery_server')
-                port = data.get('port')
-                robot_name = data.get('robot_name', 'Robot')
-                
-                print(f"\n🚀 Auto-launching ROSBridge for {robot_name}")
-                print(f"   Domain: {domain}")
-                print(f"   Port: {port}")
-                print(f"   Discovery: {discovery_server}")
-                
-                # Kill existing process for this port
-                if port in self.rosbridge_processes:
-                    try:
-                        print(f"   Stopping existing ROSBridge on port {port}")
-                        self.rosbridge_processes[port].terminate()
-                        time.sleep(1)
-                        if self.rosbridge_processes[port].poll() is None:
-                            self.rosbridge_processes[port].kill()
-                    except:
-                        pass
-                
-                # Launch ROSBridge in new terminal
-                launch_cmd = [
-                    'gnome-terminal',
-                    '--title', f'ROSBridge - {robot_name} (Port {port})',
-                    '--',
-                    'bash', '-c', 
-                    f'export ROS_DOMAIN_ID={domain}; '
-                    f'export ROS_DISCOVERY_SERVER="{discovery_server}"; '
-                    f'echo "🤖 Starting ROSBridge for {robot_name}..."; '
-                    f'echo "Domain: {domain}, Port: {port}"; '
-                    f'echo ""; '
-                    f'ros2 launch rosbridge_server rosbridge_websocket_launch.xml port:={port}; '
-                    f'echo ""; '
-                    f'echo "ROSBridge stopped. Press Enter to close..."; '
-                    f'read'
-                ]
-                
-                process = subprocess.Popen(launch_cmd)
-                self.rosbridge_processes[port] = process
-                
-                print(f"   ✅ ROSBridge terminal opened for {robot_name}")
-                
-                # Send success response
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                response = {
-                    'status': 'success', 
-                    'message': f'ROSBridge launched for {robot_name}',
-                    'port': port
-                }
-                self.wfile.write(json.dumps(response).encode())
-                
-            except Exception as e:
-                print(f"❌ Error launching ROSBridge: {e}")
-                self.send_response(500)
-                self.send_header('Content-type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                response = {'status': 'error', 'message': str(e)}
-                self.wfile.write(json.dumps(response).encode())
-                
+            self.handle_launch_rosbridge()
+        elif self.path == '/launch_slam':
+            self.handle_launch_slam()
+        elif self.path == '/stop_slam':
+            self.handle_stop_slam()
         elif self.path == '/stop_rosbridge':
-            try:
-                content_length = int(self.headers['Content-Length'])
-                post_data = self.rfile.read(content_length)
-                data = json.loads(post_data.decode('utf-8'))
-                
-                port = data.get('port')
-                
-                if port in self.rosbridge_processes:
-                    self.rosbridge_processes[port].terminate()
-                    del self.rosbridge_processes[port]
-                    print(f"🛑 Stopped ROSBridge on port {port}")
-                
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                response = {'status': 'success', 'message': f'ROSBridge stopped on port {port}'}
-                self.wfile.write(json.dumps(response).encode())
-                
-            except Exception as e:
-                self.send_response(500)
-                self.send_header('Content-type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                response = {'status': 'error', 'message': str(e)}
-                self.wfile.write(json.dumps(response).encode())
+            self.handle_stop_rosbridge()
         else:
             self.send_response(404)
             self.end_headers()
+    
+    def handle_launch_rosbridge(self):
+        try:
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+            
+            domain = data.get('domain')
+            discovery_server = data.get('discovery_server')
+            port = data.get('port')
+            robot_name = data.get('robot_name', 'Robot')
+            
+            print(f"\n🚀 Auto-launching ROSBridge for {robot_name}")
+            print(f"   Domain: {domain}")
+            print(f"   Port: {port}")
+            
+            # Kill existing process for this port
+            if port in self.rosbridge_processes:
+                try:
+                    print(f"   Stopping existing ROSBridge on port {port}")
+                    self.rosbridge_processes[port].terminate()
+                    time.sleep(1)
+                    if self.rosbridge_processes[port].poll() is None:
+                        self.rosbridge_processes[port].kill()
+                except:
+                    pass
+            
+            # Launch ROSBridge in new terminal
+            launch_cmd = [
+                'gnome-terminal',
+                '--title', f'ROSBridge - {robot_name} (Port {port})',
+                '--',
+                'bash', '-c', 
+                f'export ROS_DOMAIN_ID={domain}; '
+                f'export ROS_DISCOVERY_SERVER="{discovery_server}"; '
+                f'echo "🤖 Starting ROSBridge for {robot_name}..."; '
+                f'echo "Domain: {domain}, Port: {port}"; '
+                f'echo ""; '
+                f'ros2 launch rosbridge_server rosbridge_websocket_launch.xml port:={port}; '
+                f'echo ""; '
+                f'echo "ROSBridge stopped. Press Enter to close..."; '
+                f'read'
+            ]
+            
+            process = subprocess.Popen(launch_cmd)
+            self.rosbridge_processes[port] = process
+            
+            print(f"   ✅ ROSBridge terminal opened for {robot_name}")
+            
+            self.send_json_response({
+                'status': 'success', 
+                'message': f'ROSBridge launched for {robot_name}',
+                'port': port
+            })
+            
+        except Exception as e:
+            print(f"❌ Error launching ROSBridge: {e}")
+            self.send_json_response({
+                'status': 'error', 
+                'message': str(e)
+            }, 500)
+    
+    def handle_launch_slam(self):
+        try:
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+            
+            domain = data.get('domain')
+            discovery_server = data.get('discovery_server')
+            robot_name = data.get('robot_name', 'Robot')
+            robot_id = data.get('robot_id', robot_name.lower())
+            sync = data.get('sync', True)
+            
+            print(f"\n🗺️ Launching SLAM for {robot_name}")
+            print(f"   Domain: {domain}")
+            print(f"   Sync mode: {sync}")
+            
+            # Kill existing SLAM process for this robot
+            if robot_id in self.slam_processes:
+                try:
+                    print(f"   Stopping existing SLAM for {robot_name}")
+                    self.slam_processes[robot_id].terminate()
+                    time.sleep(1)
+                    if self.slam_processes[robot_id].poll() is None:
+                        self.slam_processes[robot_id].kill()
+                except:
+                    pass
+            
+            # Build SLAM command
+            sync_param = "sync:=true" if sync else "sync:=false"
+            slam_cmd = [
+                'gnome-terminal',
+                '--title', f'SLAM - {robot_name}',
+                '--',
+                'bash', '-c',
+                f'export ROS_DOMAIN_ID={domain}; '
+                f'export ROS_DISCOVERY_SERVER="{discovery_server}"; '
+                f'echo "🗺️ Starting SLAM for {robot_name}..."; '
+                f'echo "Domain: {domain}"; '
+                f'echo "Sync: {sync}"; '
+                f'echo ""; '
+                f'echo "Launching SLAM..."; '
+                f'ros2 launch turtlebot4_navigation slam.launch.py {sync_param}; '
+                f'echo ""; '
+                f'echo "SLAM stopped. Press Enter to close..."; '
+                f'read'
+            ]
+            
+            process = subprocess.Popen(slam_cmd)
+            self.slam_processes[robot_id] = process
+            
+            print(f"   ✅ SLAM terminal opened for {robot_name}")
+            
+            self.send_json_response({
+                'status': 'success',
+                'message': f'SLAM launched for {robot_name}',
+                'robot_id': robot_id
+            })
+            
+        except Exception as e:
+            print(f"❌ Error launching SLAM: {e}")
+            self.send_json_response({
+                'status': 'error',
+                'message': str(e)
+            }, 500)
+    
+    def handle_stop_slam(self):
+        try:
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+            
+            robot_id = data.get('robot_id')
+            robot_name = data.get('robot_name', robot_id)
+            
+            if robot_id in self.slam_processes:
+                self.slam_processes[robot_id].terminate()
+                del self.slam_processes[robot_id]
+                print(f"🛑 Stopped SLAM for {robot_name}")
+            
+            self.send_json_response({
+                'status': 'success',
+                'message': f'SLAM stopped for {robot_name}'
+            })
+            
+        except Exception as e:
+            self.send_json_response({
+                'status': 'error',
+                'message': str(e)
+            }, 500)
+    
+    def handle_stop_rosbridge(self):
+        try:
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+            
+            port = data.get('port')
+            
+            if port in self.rosbridge_processes:
+                self.rosbridge_processes[port].terminate()
+                del self.rosbridge_processes[port]
+                print(f"🛑 Stopped ROSBridge on port {port}")
+            
+            self.send_json_response({
+                'status': 'success',
+                'message': f'ROSBridge stopped on port {port}'
+            })
+            
+        except Exception as e:
+            self.send_json_response({
+                'status': 'error',
+                'message': str(e)
+            }, 500)
+    
+    def send_json_response(self, data, status_code=200):
+        self.send_response(status_code)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
     
     def do_OPTIONS(self):
         # Handle CORS preflight
@@ -157,11 +250,21 @@ class MultiRobotHandler(BaseHTTPRequestHandler):
 
 def cleanup_processes(handler):
     """Clean up all running processes"""
-    print("\n🧹 Cleaning up ROSBridge processes...")
+    print("\n🧹 Cleaning up processes...")
+    
+    # Clean up ROSBridge processes
     for port, process in handler.rosbridge_processes.items():
         try:
             process.terminate()
             print(f"   Stopped ROSBridge on port {port}")
+        except:
+            pass
+    
+    # Clean up SLAM processes  
+    for robot_id, process in handler.slam_processes.items():
+        try:
+            process.terminate()
+            print(f"   Stopped SLAM for {robot_id}")
         except:
             pass
 
@@ -181,6 +284,7 @@ def main():
     print("=" * 50)
     print("🌐 Starting integrated web server...")
     print("🚀 ROSBridge auto-launch ready...")
+    print("🗺️ SLAM auto-launch ready...")
     print("")
     
     # Start HTTP server
@@ -197,7 +301,9 @@ def main():
     print("   1. Open http://localhost:8080 in your browser")
     print("   2. Click 'Add Robot' to configure robots")  
     print("   3. Click 'Connect' - ROSBridge launches automatically!")
-    print("   4. Use Ctrl+C to stop everything")
+    print("   4. Click 'Start Mapping' - SLAM launches automatically!")
+    print("   5. Drive robots with control pads to build maps")
+    print("   6. Use Ctrl+C to stop everything")
     print("")
     
     # Auto-open browser

@@ -7,58 +7,123 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="header">
-        <h1>🤖 Multi-Robot Logistics System</h1>
-        <div class="connection-status" id="connection-status">
-            <div class="status-indicator">
-                <div class="status-dot"></div>
-                <span>No robots added</span>
+    <!-- Role Selection Screen (shown initially) -->
+    <div id="role-selection" class="role-selection-screen">
+        <div class="role-selection-container">
+            <h1>🤖 Multi-Robot Logistics System</h1>
+            <p>Please select your role to continue:</p>
+            
+            <div class="role-buttons">
+                <button class="role-btn manager-btn" onclick="selectRole('manager')">
+                    <div class="role-icon">👨‍💼</div>
+                    <div class="role-title">Manager</div>
+                    <div class="role-description">Fleet Operations & System Control</div>
+                </button>
+                
+                <button class="role-btn client-btn" onclick="selectRole('client')">
+                    <div class="role-icon">👤</div>
+                    <div class="role-title">Client</div>
+                    <div class="role-description">Order Rides & Food Delivery</div>
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="main-container">
-        <!-- Map section will be replaced by MapViewer component -->
-        <div class="map-section">
-            <h2 style="margin-bottom: 1rem;">🗺️ Live Map View</h2>
-            <div class="map-canvas" id="map-canvas">
-                <div class="map-placeholder">
-                    Loading map viewer...<br>
-                    <small>Initializing components...</small>
+    <!-- Manager Interface (hidden initially) -->
+    <div id="manager-interface" class="interface-screen" style="display: none;">
+        <div class="header">
+            <h1>🤖 Fleet Management Dashboard</h1>
+            <div class="header-controls">
+                <button class="btn-small switch-role-btn" onclick="switchRole()">👤 Switch to Client</button>
+                <div class="connection-status" id="connection-status">
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>No robots added</span>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="control-section">
-            <!-- Robot cards will be dynamically added here -->
-            
-            <div class="ride-controls">
-                <h3>🚗 Request Ride</h3>
-                <div class="location-input">
-                    <label>Pickup Location:</label>
-                    <div class="location-display" id="pickup-display">Click on map to set pickup</div>
-                </div>
-                <div class="location-input">
-                    <label>Destination:</label>
-                    <div class="location-display" id="destination-display">Click on map to set destination</div>
-                </div>
-                <button class="btn" id="request-ride-btn" disabled>Set Pickup Location</button>
-                
-                <!-- System Controls -->
-                <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-                    <button class="btn" id="add-robot-btn" style="background: rgba(81, 207, 102, 0.6); flex: 1;" 
-                            onclick="if(window.robotManager) window.robotManager.showAddRobotDialog(); else console.log('Robot manager not ready');">
-                        ➕ Add Robot
-                    </button>
-                    <button class="btn" onclick="if(window.app) window.app.startMapping(); else console.log('App not ready');" 
-                            style="background: rgba(51, 154, 240, 0.6); flex: 1;">
-                        🗺️ Start Mapping
-                    </button>
+        
+        <div class="main-container">
+            <!-- Map section will be replaced by MapViewer component -->
+            <div class="map-section">
+                <h2 style="margin-bottom: 1rem;">🗺 Live Map View</h2>
+                <div class="map-canvas" id="map-canvas">
+                    <div class="map-placeholder">
+                        Loading map viewer...<br>
+                        <small>Initializing components...</small>
+                    </div>
                 </div>
             </div>
+            
+            <div class="control-section">
+                <!-- Robot cards will be dynamically added here -->
+                
+                <div class="manager-controls">
+                    <h3>🔧 System Controls</h3>
+                    
+                    <!-- Robot Management -->
+                    <div style="margin-bottom: 1rem;">
+                        <button class="btn" id="add-robot-btn" style="background: rgba(81, 207, 102, 0.6);" 
+                                onclick="if(window.robotManager) window.robotManager.showAddRobotDialog(); else console.log('Robot manager not ready');">
+                            ➕ Add Robot
+                        </button>
+                    </div>
+                    
+                    <!-- SLAM Controls -->
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <button class="btn" onclick="if(window.app) window.app.startMapping(); else console.log('App not ready');" 
+                                style="background: rgba(51, 154, 240, 0.6); flex: 1;">
+                            🗺 Start Mapping
+                        </button>
+                        <button class="btn" onclick="if(window.app) window.app.stopMapping(); else console.log('App not ready');" 
+                                style="background: rgba(255, 107, 107, 0.6); flex: 1;">
+                            ⏹ Stop Mapping
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="log-section">
+                    <div id="log-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            <div class="log-section">
-                <div id="log-container"></div>
+    <!-- Client Interface (hidden initially, placeholder for future) -->
+    <div id="client-interface" class="interface-screen" style="display: none;">
+        <div class="header">
+            <h1>🛍 Customer Services</h1>
+            <div class="header-controls">
+                <button class="btn-small switch-role-btn" onclick="switchRole()">👨‍💼 Switch to Manager</button>
+            </div>
+        </div>
+        
+        <div class="main-container">
+            <div class="client-services">
+                <h2>Welcome! Choose a service:</h2>
+                
+                <div class="service-options">
+                    <div class="service-card">
+                        <div class="service-icon">🚗</div>
+                        <h3>Order a Ride</h3>
+                        <p>Get transportation from point A to point B</p>
+                        <button class="btn" onclick="startRideService()">Request Ride</button>
+                    </div>
+                    
+                    <div class="service-card">
+                        <div class="service-icon">🍕</div>
+                        <h3>Order Food</h3>
+                        <p>Have food delivered to your location</p>
+                        <button class="btn" onclick="startFoodService()">Order Food</button>
+                    </div>
+                </div>
+                
+                <div class="client-placeholder">
+                    <h3>🚧 Coming Soon</h3>
+                    <p>Client interfaces will be implemented in the next phase.</p>
+                    <p>For now, use Manager mode to control the robot fleet.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -73,5 +138,93 @@
     <script src="js/components/map-viewer.js"></script>
     <script src="js/components/robot-manager.js"></script>
     <script src="js/main.js"></script>
+    
+    <!-- Role selection script -->
+    <script>
+        let currentRole = null;
+        
+        function selectRole(role) {
+            currentRole = role;
+            
+            // Hide role selection
+            document.getElementById('role-selection').style.display = 'none';
+            
+            if (role === 'manager') {
+                // Show manager interface and initialize app
+                document.getElementById('manager-interface').style.display = 'flex';
+                document.getElementById('manager-interface').style.flexDirection = 'column';
+                document.getElementById('manager-interface').style.height = '100vh';
+                
+                // Initialize the manager app
+                setTimeout(async () => {
+                    await initializeManagerApp();
+                }, 100);
+                
+            } else if (role === 'client') {
+                // Show client interface (placeholder for now)
+                document.getElementById('client-interface').style.display = 'flex';
+                document.getElementById('client-interface').style.flexDirection = 'column';
+                document.getElementById('client-interface').style.height = '100vh';
+            }
+        }
+        
+        function switchRole() {
+            // Hide current interface
+            if (currentRole === 'manager') {
+                document.getElementById('manager-interface').style.display = 'none';
+            } else if (currentRole === 'client') {
+                document.getElementById('client-interface').style.display = 'none';
+            }
+            
+            // Show role selection
+            document.getElementById('role-selection').style.display = 'flex';
+            currentRole = null;
+        }
+        
+        function startRideService() {
+            alert('🚧 Ride service interface coming in Phase 2!');
+        }
+        
+        function startFoodService() {
+            alert('🚧 Food delivery interface coming in Phase 3!');
+        }
+        
+        async function initializeManagerApp() {
+            try {
+                console.log('Starting manager app initialization...');
+                
+                // Check if required classes exist
+                if (typeof ROSConnector === 'undefined') {
+                    throw new Error('ROSConnector class not found - check js/services/ros-connector.js');
+                }
+                if (typeof RobotManager === 'undefined') {
+                    throw new Error('RobotManager class not found - check js/components/robot-manager.js');
+                }
+                if (typeof MapViewer === 'undefined') {
+                    throw new Error('MapViewer class not found - check js/components/map-viewer.js');
+                }
+                
+                console.log('All required classes found, creating app...');
+                const app = new MultiRobotApp();
+                
+                console.log('App created, initializing...');
+                await app.init();
+                
+                console.log('App initialized, setting global reference...');
+                window.app = app;
+                
+                console.log('Manager app initialization complete!');
+                
+            } catch (error) {
+                console.error('Detailed initialization error:', error);
+                alert(`Initialization failed: ${error.message}`);
+            }
+        }
+
+      // Pre-load component classes when page loads
+      document.addEventListener('DOMContentLoaded', () => {
+          console.log('Page loaded, components ready');
+      });
+    </script>
 </body>
 </html>
